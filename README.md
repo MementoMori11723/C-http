@@ -1,24 +1,52 @@
 # C-HTTP
 
-A Lightweight and Minimal HTTP Server Written in C
+A Lightweight and Minimal HTTP Server Written in C that serves static files and stops when the Enter key is pressed.
 
-## How to run
-```bash
-$ make
-```
+## How to Run
 
-## How to test
-```bash
-$ wget localhost:7926/index.html
-```
+1. Clone this repository:
 
-## What are we doing?  
-We start by creating a socket and binding it to a specific port, which allows the server to listen for incoming connections. Once the server is running, it:  
+    ```bash
+    git clone http://github.com/MementoMori11723/C-http.git C-HTTP
+    cd C-HTTP
+    ```
 
-1. **Listens** for incoming requests on the bound port.  
-2. **Accepts** the connection when a client reaches out.  
-3. **Reads** the HTTP request data sent by the client.  
-4. **Processes** the request to determine the appropriate response.  
-5. **Sends** back the response, typically including an HTTP status code, headers, and the requested content (e.g., an HTML file).  
+2. Build the project using `make`:
 
-This simple workflow demonstrates the foundational steps of an HTTP server.
+    ```bash
+    make
+    ```
+
+3. Run the server:
+
+    ```bash
+    ./simple_http
+    ```
+
+   The server will run on `http://localhost:8000`.
+
+4. To stop the server, press the **Enter** key.
+
+## How to Test
+
+1. Open a browser or use `wget` or `curl` to test the server:
+
+    ```bash
+    wget http://localhost:8000/index.html
+    ```
+    or
+
+    ```bash
+    curl http://localhost:8000/index.html
+    ```
+
+2. If the requested file is found, it will be served with a `200 OK` response. If the file is not found, a `404 Not Found` response will be sent.
+
+## What It Does
+
+- The server listens on port 8000 for incoming HTTP requests.
+- It serves files based on the requested URL.
+- If the file exists, it sends the file with a `200 OK` response.
+- If the file does not exist, it sends a `404 Not Found` response.
+- The server stops when the **Enter** key is pressed.
+
