@@ -75,7 +75,7 @@ int main() {
         continue;
       }
 
-      char buffer[256] = {0};
+      char buffer[4096] = {0}; // Increased buffer size to 4096 bytes
       recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 
       char *f = buffer + 5; // Extract file name after "GET /"
@@ -86,6 +86,7 @@ int main() {
       int fd = open(f, O_RDONLY);
       if (fd < 0) {
         // File not found: Send 404 response
+        printf("%s\n", f);
         char *response = "HTTP/1.1 404 Not Found\r\n"
           "Content-Type: text/plain\r\n"
           "Content-Length: 13\r\n"
@@ -94,9 +95,10 @@ int main() {
         send(client_fd, response, strlen(response), 0);
       } else {
         // File found: Send 200 OK response and file content
+        printf("%s\n", f);
         char *header = "HTTP/1.1 200 OK\r\n\r\n";
         send(client_fd, header, strlen(header), 0);
-        sendfile(client_fd, fd, NULL, 256);
+        sendfile(client_fd, fd, NULL, 4096); // Use the updated buffer size
         close(fd);
       }
 
@@ -110,3 +112,4 @@ int main() {
   close(s);
   return 0;
 }
+
