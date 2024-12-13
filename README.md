@@ -40,7 +40,7 @@ A lightweight and minimal HTTP server written in C that serves static files. The
    Use Docker Compose to build and run the container:
 
    ```bash
-   docker-compose up --build -d
+   docker-compose up --build -d -f compose.yml
    ```
 
    This will automatically build the Docker image and start the server in a container, listening on `http://localhost:11000`.
@@ -50,7 +50,7 @@ A lightweight and minimal HTTP server written in C that serves static files. The
    To stop the server running in Docker, press the **Enter** key inside the terminal where the container is running. Alternatively, you can use:
 
    ```bash
-   docker-compose down
+   docker-compose down -f compose.yml
    ```
 
    This will stop and remove the container.
@@ -64,7 +64,7 @@ A lightweight and minimal HTTP server written in C that serves static files. The
    cd C-HTTP
    ```
 
-2. **Build the Project**:
+2. **Build and Run the Project**:
 
    Use `make` to compile the project:
 
@@ -72,17 +72,9 @@ A lightweight and minimal HTTP server written in C that serves static files. The
    make
    ```
 
-3. **Start the Server**:
-
-   To start the server, run:
-
-   ```bash
-   ./http_server
-   ```
-
    The server will start and listen on `http://localhost:11000` by default.
 
-4. **Stop the Server**:
+3. **Stop the Server**:
 
    To stop the server, press the **Enter** key. Alternatively, you can use:
 
