@@ -19,9 +19,27 @@ void check_enter_key() {
   }
 }
 
+// Function to handle sending data with error checking
+ssize_t safe_send(int client_fd, const void *data, size_t size) {
+  ssize_t bytes_sent = 0;
+  while (bytes_sent < size) {
+    ssize_t ret = send(client_fd, data + bytes_sent, size - bytes_sent, 0);
+    if (ret < 0) {
+      perror("Send failed");
+      return ret;
+    }
+    bytes_sent += ret;
+  }
+  return bytes_sent;
+}
+
 int main() {
   // Create a socket
   int s = socket(AF_INET, SOCK_STREAM, 0);
+  if (s < 0) {
+    perror("Socket creation failed");
+    exit(1);
+  }
 
   // Bind the socket to port 8000
   struct sockaddr_in addr = {
@@ -76,7 +94,12 @@ int main() {
       }
 
       char buffer[4096] = {0};
-      recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+      ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+      if (bytes_received <= 0) {
+        perror("Recv failed or client disconnected");
+        close(client_fd);
+        continue;
+      }
 
       // Extract file name after "GET /"
       char *f = buffer + 5;
@@ -100,19 +123,22 @@ int main() {
           "Content-Length: 86\r\n"
           "\r\n"
           "<html><body><h1>404 Not Found</h1><p>The requested file does not exist.</p></body></html>";
-        send(client_fd, response, strlen(response), 0);
+        if (safe_send(client_fd, response, strlen(response)) < 0) {
+          perror("Send failed");
+        }
       } else {
         // File found: Send 200 OK response and file content
         char *header = "HTTP/1.1 200 OK\r\n\r\n";
-        send(client_fd, header, strlen(header), 0);
+        if (safe_send(client_fd, header, strlen(header)) < 0) {
+          perror("Send failed");
+        }
 
         // Read and send the file in chunks
         char file_buffer[4096];
         ssize_t bytes_read;
         while ((bytes_read = read(fd, file_buffer, sizeof(file_buffer))) > 0) {
-          if (send(client_fd, file_buffer, bytes_read, 0) < 0) {
-            perror("Send failed");
-            break;
+          if (safe_send(client_fd, file_buffer, bytes_read) < 0) {
+            break;  // Stop sending if there was an error
           }
         }
         close(fd);
@@ -128,3 +154,4 @@ int main() {
   close(s);
   return 0;
 }
+
