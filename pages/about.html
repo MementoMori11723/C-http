@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>C-Http-server About Page</title>
+  <style>
+    body {
+      font-family: "Roboto", sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #007bff;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header,
+    footer {
+      background-color: #007bff;
+      color: #fff;
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: #007bff;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .navbar .logo {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .container {
+      text-align: left;
+      padding: 2rem;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      max-width: 700px;
+      width: 90%;
+      animation: slideIn 1s ease-out;
+      overflow-y: auto;
+      max-height: 100vh;
+      margin: 2rem auto;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #000;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    p {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #000;
+    }
+
+    ul {
+      margin: 1rem 0 0;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes slideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    footer {
+      background-color: #218bfc;
+      margin-top: auto;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .container {
+        padding: 1.5rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      ul {
+        padding-left: 1rem;
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+      .container {
+        padding: 2rem;
+        width: 80%;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      p {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      p {
+        font-size: 0.95rem;
+      }
+
+      ul {
+        padding-left: 0.5rem;
+      }
+    }
+
+    @media (min-width: 1024px) and (orientation: landscape) {
+      .container {
+        width: 70%;
+        padding: 3rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      p {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo"><a href="/">C - Server</a></div>
+      <div><a href="/">Home</a> <a href="about.html">About</a></div>
+    </nav>
+  </header>
+  <div class="container">
+    <h1>About</h1>
+    <p>This is a Sample about page for C server!</p>
+    <p>
+      Ipsum at itaque explicabo minus fugiat maiores Fugit impedit repellat
+      veniam fuga dolore? Velit nihil quae laboriosam nihil ipsam. Molestiae
+      earum ad dolores tenetur cupiditate! Esse expedita accusantium doloribus
+      minus? Consectetur nobis recusandae possimus saepe eos dolor et. Laborum
+      ad unde praesentium corporis maxime Ipsam quaerat voluptatum quidem
+      dolore corrupti? Alias vel animi provident magnam quam! Ipsum aut non ad
+      Adipisicing enim quia sed commodi possimus Id accusantium recusandae nam
+      assumenda vel facilis Maiores quibusdam doloribus nisi doloribus
+      voluptate Aspernatur quidem ipsam quisquam adipisci fuga voluptatum
+      sapiente dicta! Temporibus illo.
+    </p>
+  </div>
+  <footer>&copy; 2024 C Server Project. All Rights Reserved.</footer>
+</body>
+
+</html>

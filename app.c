@@ -42,7 +42,7 @@ int main() {
     exit(1);
   }
 
-  printf("Server is running on http://localhost:8000\n");
+  printf("Server is up and running\n");
 
   fd_set read_fds;
   int max_fd = s;
@@ -75,30 +75,46 @@ int main() {
         continue;
       }
 
-      char buffer[4096] = {0}; // Increased buffer size to 4096 bytes
+      char buffer[4096] = {0};
       recv(client_fd, buffer, sizeof(buffer) - 1, 0);
 
-      char *f = buffer + 5; // Extract file name after "GET /"
+      // Extract file name after "GET /"
+      char *f = buffer + 5;
       char *end = strchr(f, ' ');
       if (end) *end = 0;
 
-      // Check if the file exists
-      int fd = open(f, O_RDONLY);
+      // Default to "index.html" if no file is specified
+      if (strcmp(f, "") == 0 || strcmp(f, "/") == 0) {
+        f = "index.html";
+      }
+
+      // Construct the file path in "pages" directory
+      char file_path[512];
+      snprintf(file_path, sizeof(file_path), "pages/%s", f);
+
+      int fd = open(file_path, O_RDONLY);
       if (fd < 0) {
         // File not found: Send 404 response
-        printf("%s\n", f);
         char *response = "HTTP/1.1 404 Not Found\r\n"
-          "Content-Type: text/plain\r\n"
-          "Content-Length: 13\r\n"
+          "Content-Type: text/html\r\n"
+          "Content-Length: 86\r\n"
           "\r\n"
-          "404 Not Found";
+          "<html><body><h1>404 Not Found</h1><p>The requested file does not exist.</p></body></html>";
         send(client_fd, response, strlen(response), 0);
       } else {
         // File found: Send 200 OK response and file content
-        printf("%s\n", f);
         char *header = "HTTP/1.1 200 OK\r\n\r\n";
         send(client_fd, header, strlen(header), 0);
-        sendfile(client_fd, fd, NULL, 4096); // Use the updated buffer size
+
+        // Read and send the file in chunks
+        char file_buffer[4096];
+        ssize_t bytes_read;
+        while ((bytes_read = read(fd, file_buffer, sizeof(file_buffer))) > 0) {
+          if (send(client_fd, file_buffer, bytes_read, 0) < 0) {
+            perror("Send failed");
+            break;
+          }
+        }
         close(fd);
       }
 
@@ -112,4 +128,3 @@ int main() {
   close(s);
   return 0;
 }
-

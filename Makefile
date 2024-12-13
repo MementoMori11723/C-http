@@ -1,4 +1,6 @@
 run :
-	@gcc -o app app.c
-	@./app
-	@rm app
+	@docker-compose -f compose.yml build
+	@docker-compose -f compose.yml up -d
+
+stop :
+	@docker-compose -f compose.yml down

@@ -1,0 +1,7 @@
+services:
+  c-http-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "11000:8000"

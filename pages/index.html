@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>C - Server</title>
+  <style>
+    body {
+      font-family: "Roboto", sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #007bff;
+      color: #000;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header,
+    footer {
+      background-color: #007bff;
+      color: #fff;
+      text-align: center;
+      padding: 0.5rem 0;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background-color: #007bff;
+    }
+
+    .navbar a {
+      color: #fff;
+      text-decoration: none;
+      margin: 0 0.5rem;
+    }
+
+    .navbar a:hover {
+      text-decoration: underline;
+    }
+
+    .navbar .logo {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    .container {
+      text-align: left;
+      padding: 2rem;
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+      max-width: 700px;
+      width: 90%;
+      animation: slideIn 1s ease-out;
+      overflow-y: auto;
+      max-height: 100vh;
+      margin: 2rem auto;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 1rem;
+      color: #000;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    p {
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #000;
+    }
+
+    ul {
+      margin: 1rem 0 0;
+      padding-left: 1.5rem;
+    }
+
+    li {
+      margin: 0.5rem 0;
+    }
+
+    a {
+      color: #007bff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    @keyframes slideIn {
+      0% {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    footer {
+      background-color: #218bfc;
+      margin-top: auto;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      .container {
+        padding: 1.5rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+
+      ul {
+        padding-left: 1rem;
+      }
+    }
+
+    @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+      .container {
+        padding: 2rem;
+        width: 80%;
+      }
+
+      h1 {
+        font-size: 2.2rem;
+      }
+
+      p {
+        font-size: 1.1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+
+      p {
+        font-size: 0.95rem;
+      }
+
+      ul {
+        padding-left: 0.5rem;
+      }
+    }
+
+    @media (min-width: 1024px) and (orientation: landscape) {
+      .container {
+        width: 70%;
+        padding: 3rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+
+      p {
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <nav class="navbar">
+      <div class="logo"><a href="/">C - Server</a></div>
+      <div><a href="/">Home</a> <a href="about.html">About</a></div>
+    </nav>
+  </header>
+  <div class="container">
+    <h1>Welcome to the C Server Explanation</h1>
+    <p>
+      <strong>Overview:</strong> This project demonstrates a basic web server
+      written in C. It listens on port 8000 and serves requests for files
+      stored on the server. If the requested file is found, the server sends
+      it back with a 200 OK response. Otherwise, a 404 Not Found response is
+      sent.
+    </p>
+    <p>
+      <strong>How It Works:</strong> The server uses sockets to handle network
+      communication. It binds to an IP address and port, listens for incoming
+      connections, and processes requests from clients. When a client requests
+      a file, the server parses the request to determine the file name, checks
+      if the file exists, and responds appropriately.
+    </p>
+    <p><strong>Features:</strong></p>
+    <ul>
+      <li>
+        Handles multiple client connections using the
+        <code>select</code> system call.
+      </li>
+      <li>Gracefully shuts down when the Enter key is pressed.</li>
+      <li>Supports serving static files like HTML documents.</li>
+    </ul>
+    <p>
+      <strong>Use Case:</strong> This type of server is a foundational example
+      of how web servers work. It can be expanded to include additional
+      features like dynamic content generation, logging, and handling more
+      complex HTTP methods.
+    </p>
+    <p>
+      <strong>Key Learning:</strong> By building this project, you gain a
+      deeper understanding of low-level networking, HTTP protocol basics, and
+      how servers handle client requests and responses.
+    </p>
+    <p>
+      <strong>Source Code:</strong> You can find the source code for this
+      project on
+      <a href="https://github.com/MementoMori11723/C-http.git" target="_blank">GitHub</a>
+    </p>
+  </div>
+  <footer>&copy; 2024 C Server Project. All Rights Reserved.</footer>
+</body>
+
+</html>
