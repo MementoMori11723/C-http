@@ -1,0 +1,29 @@
+name: Run Ansible Playbook
+
+on:
+  push:
+    branches:
+      - main # or your desired branch
+
+jobs:
+  run-playbook:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Ansible
+        run: |
+          sudo apt update
+          sudo apt install -y ansible
+
+      - name: Create dynamic inventory.ini
+        run: |
+          mkdir -p ansible  # Make sure the ansible directory exists
+          echo "[vps]" > ansible/inventory.ini
+          echo "${{ secrets.VPS_IP }}" >> ansible/inventory.ini
+          echo "[vps:vars]" >> ansible/inventory.ini
+          echo "ansible_ssh_user=${{ secrets.ANSIBLE_SSH_USER }}" >> ansible/inventory.ini
+
+      - name: Run Ansible playbook
+        run: ansible-playbook ansible/playbook.yml -i ansible/inventory.ini
