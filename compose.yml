@@ -3,7 +3,5 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    deploy:
-      replicas: 5
     ports:
-      - "11000-11004:8000"
+      - "11000:8000"
