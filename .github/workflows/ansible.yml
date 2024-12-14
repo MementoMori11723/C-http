@@ -17,16 +17,11 @@ jobs:
           sudo apt update
           sudo apt install -y ansible openssh-client
 
-      - name: Generate SSH key pair for Ansible
+      - name: Add SSH private key for Ansible
         run: |
           mkdir -p ~/.ssh
-          ssh-keygen -t rsa -b 2048 -f ~/.ssh/id_rsa -N ""
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
-      - name: Add VPS public key to authorized_keys (for testing, ideally do this manually on your VPS)
-        run: |
-          echo "${{ secrets.VPS_SSH_PUBLIC_KEY }}" >> ~/.ssh/authorized_keys
-          chmod 600 ~/.ssh/authorized_keys
 
       - name: Create dynamic inventory.ini
         run: |
@@ -44,6 +39,4 @@ jobs:
           chmod 644 ~/.ssh/known_hosts
 
       - name: Run Ansible playbook
-        run: |
-          export ANSIBLE_SSH_ARGS="-v"
-          ansible-playbook ansible/playbook.yml -i ansible/inventory.ini
+        run: ansible-playbook ansible/playbook.yml -i ansible/inventory.ini
