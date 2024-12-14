@@ -6,4 +6,4 @@ services:
     deploy:
       replicas: 5
     ports:
-      - "11000:8000"
+      - "8000"
