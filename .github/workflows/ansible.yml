@@ -12,16 +12,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Ansible
+      - name: Set up Ansible and sshpass
         run: |
           sudo apt update
-          sudo apt install -y ansible openssh-client
-
-      - name: Add SSH private key for Ansible
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          sudo apt install -y ansible openssh-client sshpass  # Install sshpass for password-based SSH authentication
 
       - name: Create dynamic inventory.ini
         run: |
@@ -30,7 +24,7 @@ jobs:
           echo "${{ secrets.VPS_IP }}" >> ansible/inventory.ini
           echo "[vps:vars]" >> ansible/inventory.ini
           echo "ansible_ssh_user=${{ secrets.ANSIBLE_SSH_USER }}" >> ansible/inventory.ini
-          echo "ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventory.ini
+          echo "ansible_ssh_password=${{ secrets.VPS_SSH_PASSWORD }}" >> ansible/inventory.ini
 
       - name: Add VPS SSH key to known hosts
         run: |
@@ -38,5 +32,5 @@ jobs:
           ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Run Ansible playbook
+      - name: Run Ansible playbook with password
         run: ansible-playbook ansible/playbook.yml -i ansible/inventory.ini
