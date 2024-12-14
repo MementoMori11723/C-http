@@ -3,6 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>C-Http-server About Page</title>
   <style>
     body {
@@ -112,7 +113,7 @@
       margin-top: auto;
     }
 
-    /* Responsive Design */
+    /* Portrait and Landscape Responsive Design */
     @media (max-width: 768px) {
       h1 {
         font-size: 2rem;
@@ -131,7 +132,7 @@
       }
     }
 
-    @media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) {
+    @media (max-width: 1024px) and (orientation: landscape) {
       .container {
         padding: 2rem;
         width: 80%;
@@ -176,6 +177,22 @@
 
       p {
         font-size: 1.1rem;
+      }
+    }
+
+    /* For larger screens */
+    @media (min-width: 1200px) {
+      .container {
+        width: 60%;
+        padding: 3rem;
+      }
+
+      h1 {
+        font-size: 2.7rem;
+      }
+
+      p {
+        font-size: 1.2rem;
       }
     }
   </style>
