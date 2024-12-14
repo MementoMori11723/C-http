@@ -1,0 +1,9 @@
+---
+- hosts: vps
+  become: yes
+  tasks:
+    - name: Pull the latest changes and run the makefile
+      shell: |
+        cd ~/C-http && git pull origin main && make
+      args:
+        executable: /bin/bash
