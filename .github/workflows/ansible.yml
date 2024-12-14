@@ -17,6 +17,12 @@ jobs:
           sudo apt update
           sudo apt install -y ansible openssh-client
 
+      - name: Setup SSH private key for authentication
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
       - name: Create dynamic inventory.ini
         run: |
           mkdir -p ansible  # Ensure the ansible directory exists
@@ -24,19 +30,13 @@ jobs:
           echo "${{ secrets.VPS_IP }}" >> ansible/inventory.ini
           echo "[vps:vars]" >> ansible/inventory.ini
           echo "ansible_ssh_user=${{ secrets.ANSIBLE_SSH_USER }}" >> ansible/inventory.ini
-          echo "ansible_ssh_private_key_file=/tmp/id_rsa" >> ansible/inventory.ini
+          echo "ansible_ssh_private_key_file=~/.ssh/id_rsa" >> ansible/inventory.ini
 
       - name: Add VPS SSH key to known hosts
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.VPS_IP }} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
-
-      - name: Setup SSH private key for authentication
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
 
       - name: Run Ansible playbook
         run: ansible-playbook ansible/playbook.yml -i ansible/inventory.ini
