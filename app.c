@@ -6,12 +6,25 @@
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <pthread.h>
 #include <sys/select.h>
 #include <stdbool.h>
 
-bool stop_server = false;
+#define MAX_BUFFER 5000
+#define MAX_THREADS 25
+#define MAX_QUEUE 250
 
-// Function to check for Enter key input
+typedef struct {
+  int client_fd;
+} client_t;
+
+volatile bool stop_server = false;
+
+client_t client_queue[MAX_QUEUE];
+int queue_front = 0, queue_rear = 0;
+pthread_mutex_t queue_lock;
+pthread_cond_t queue_cond;
+
 void check_enter_key() {
   char buf;
   if (read(STDIN_FILENO, &buf, 1) == 1 && buf == '\n') {
@@ -19,7 +32,6 @@ void check_enter_key() {
   }
 }
 
-// Function to handle sending data with error checking
 ssize_t safe_send(int client_fd, const void *data, size_t size) {
   ssize_t bytes_sent = 0;
   while (bytes_sent < size) {
@@ -33,125 +45,159 @@ ssize_t safe_send(int client_fd, const void *data, size_t size) {
   return bytes_sent;
 }
 
+void *handle_client(void *arg) {
+  while (!stop_server) {
+    pthread_mutex_lock(&queue_lock);
+
+    while (queue_front == queue_rear && !stop_server) {
+      pthread_cond_wait(&queue_cond, &queue_lock);
+    }
+
+    if (stop_server) {
+      pthread_mutex_unlock(&queue_lock);
+      break;
+    }
+
+    int client_fd = client_queue[queue_front].client_fd;
+    queue_front = (queue_front + 1) % MAX_QUEUE; // Move front to the next request
+    pthread_mutex_unlock(&queue_lock);
+
+    char buffer[MAX_BUFFER] = {0};
+    ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
+    if (bytes_received <= 0) {
+      perror("Recv failed or client disconnected");
+      close(client_fd);
+      continue;
+    }
+
+    char *f = buffer + 5;
+    char *end = strchr(f, ' ');
+    if (end) *end = 0;
+
+    if (strcmp(f, "") == 0 || strcmp(f, "/") == 0) {
+      f = "index.html";
+    }
+
+    char file_path[512];
+    snprintf(file_path, sizeof(file_path), "pages/%s", f);
+
+    int fd = open(file_path, O_RDONLY);
+    if (fd < 0) {
+      char *response = "HTTP/1.1 404 Not Found\r\n"
+        "Content-Type: text/html\r\n"
+        "Content-Length: 86\r\n"
+        "\r\n"
+        "<html><body><h1>404 Not Found</h1><p>The requested file does not exist.</p></body></html>";
+      if (safe_send(client_fd, response, strlen(response)) < 0) {
+        perror("Send failed");
+      }
+    } else {
+      char *header = "HTTP/1.1 200 OK\r\n\r\n";
+      if (safe_send(client_fd, header, strlen(header)) < 0) {
+        perror("Send failed");
+      }
+
+      char file_buffer[MAX_BUFFER];
+      ssize_t bytes_read;
+      while ((bytes_read = read(fd, file_buffer, sizeof(file_buffer))) > 0) {
+        if (safe_send(client_fd, file_buffer, bytes_read) < 0) {
+          break;
+        }
+      }
+      close(fd);
+    }
+
+    close(client_fd);
+  }
+
+  return NULL;
+}
+
+void *accept_clients(void *arg) {
+  int server_fd = *((int *)arg);
+  while (!stop_server) {
+    struct sockaddr_in client_addr;
+    socklen_t client_addr_len = sizeof(client_addr);
+    int client_fd = accept(server_fd, (struct sockaddr *)&client_addr, &client_addr_len);
+    if (client_fd < 0) {
+      perror("Accept failed");
+      continue;
+    }
+
+    pthread_mutex_lock(&queue_lock);
+
+    if ((queue_rear + 1) % MAX_QUEUE == queue_front) {
+      printf("Queue is full... Rejecting connection\n");
+      close(client_fd);
+    } else {
+      client_queue[queue_rear].client_fd = client_fd;
+      queue_rear = (queue_rear + 1) % MAX_QUEUE;
+      pthread_cond_signal(&queue_cond);
+    }
+
+    pthread_mutex_unlock(&queue_lock);
+  }
+
+  return NULL;
+}
+
 int main() {
-  // Create a socket
-  int s = socket(AF_INET, SOCK_STREAM, 0);
-  if (s < 0) {
+  int server_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if (server_fd < 0) {
     perror("Socket creation failed");
     exit(1);
   }
 
-  // Bind the socket to port 8000
   struct sockaddr_in addr = {
     .sin_family = AF_INET,
-    .sin_port = htons(8000), // Port 8000
-    .sin_addr.s_addr = INADDR_ANY // Bind to all available interfaces
+    .sin_port = htons(8000),
+    .sin_addr.s_addr = INADDR_ANY
   };
 
-  if (bind(s, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+  if (bind(server_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
     perror("Bind failed");
-    close(s);
+    close(server_fd);
     exit(1);
   }
 
-  if (listen(s, 10) < 0) {
+  if (listen(server_fd, 10) < 0) {
     perror("Listen failed");
-    close(s);
+    close(server_fd);
     exit(1);
   }
 
   printf("Server is up and running\n");
 
-  fd_set read_fds;
-  int max_fd = s;
-  struct timeval timeout = {1, 0}; // Timeout for select (1 second)
+  pthread_mutex_init(&queue_lock, NULL);
+  pthread_cond_init(&queue_cond, NULL);
 
-  // Run until Enter is pressed
-  while (!stop_server) {
-    FD_ZERO(&read_fds);
-    FD_SET(s, &read_fds); // Add server socket to the set
-    FD_SET(STDIN_FILENO, &read_fds); // Add stdin (keyboard) to the set
-
-    // Wait for activity on either socket or stdin
-    int activity = select(max_fd + 1, &read_fds, NULL, NULL, &timeout);
-
-    if (activity < 0) {
-      perror("Select error");
-      break;
-    }
-
-    // Check if Enter key was pressed
-    if (FD_ISSET(STDIN_FILENO, &read_fds)) {
-      check_enter_key();
-    }
-
-    // Check if there is an incoming connection
-    if (FD_ISSET(s, &read_fds)) {
-      int client_fd = accept(s, NULL, NULL);
-      if (client_fd < 0) {
-        perror("Accept failed");
-        continue;
-      }
-
-      char buffer[4096] = {0};
-      ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer) - 1, 0);
-      if (bytes_received <= 0) {
-        perror("Recv failed or client disconnected");
-        close(client_fd);
-        continue;
-      }
-
-      // Extract file name after "GET /"
-      char *f = buffer + 5;
-      char *end = strchr(f, ' ');
-      if (end) *end = 0;
-
-      // Default to "index.html" if no file is specified
-      if (strcmp(f, "") == 0 || strcmp(f, "/") == 0) {
-        f = "index.html";
-      }
-
-      // Construct the file path in "pages" directory
-      char file_path[512];
-      snprintf(file_path, sizeof(file_path), "pages/%s", f);
-
-      int fd = open(file_path, O_RDONLY);
-      if (fd < 0) {
-        // File not found: Send 404 response
-        char *response = "HTTP/1.1 404 Not Found\r\n"
-          "Content-Type: text/html\r\n"
-          "Content-Length: 86\r\n"
-          "\r\n"
-          "<html><body><h1>404 Not Found</h1><p>The requested file does not exist.</p></body></html>";
-        if (safe_send(client_fd, response, strlen(response)) < 0) {
-          perror("Send failed");
-        }
-      } else {
-        // File found: Send 200 OK response and file content
-        char *header = "HTTP/1.1 200 OK\r\n\r\n";
-        if (safe_send(client_fd, header, strlen(header)) < 0) {
-          perror("Send failed");
-        }
-
-        // Read and send the file in chunks
-        char file_buffer[4096];
-        ssize_t bytes_read;
-        while ((bytes_read = read(fd, file_buffer, sizeof(file_buffer))) > 0) {
-          if (safe_send(client_fd, file_buffer, bytes_read) < 0) {
-            break;  // Stop sending if there was an error
-          }
-        }
-        close(fd);
-      }
-
-      close(client_fd);
+  pthread_t threads[MAX_THREADS];
+  for (int i = 0; i < MAX_THREADS; i++) {
+    if (pthread_create(&threads[i], NULL, handle_client, NULL) != 0) {
+      perror("Error creating thread");
+      exit(1);
     }
   }
 
-  printf("Server stopped.\n");
+  pthread_t accept_thread;
+  if (pthread_create(&accept_thread, NULL, accept_clients, &server_fd) != 0) {
+    perror("Error creating accept thread");
+    exit(1);
+  }
 
-  // Close the server socket
-  close(s);
+  while (!stop_server) {
+    check_enter_key();
+  }
+
+  for (int i = 0; i < MAX_THREADS; i++) {
+    pthread_join(threads[i], NULL);
+  }
+  pthread_join(accept_thread, NULL);
+
+  pthread_mutex_destroy(&queue_lock);
+  pthread_cond_destroy(&queue_cond);
+  close(server_fd);
+
+  printf("Server stopped.\n");
   return 0;
 }
-
