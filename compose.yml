@@ -1,6 +1,6 @@
 services:
   reverse-proxy:
-    image: nginx:latest
+    image: nginx:stable-alpine
     container_name: reverse-proxy
     restart: always
     ports:
@@ -14,7 +14,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.3"
+          cpus: "0.2"
           memory: 128M
     networks:
       - c-http-net
@@ -29,8 +29,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "0.2"
-          memory: 256M
+          cpus: "0.3"
+          memory: 300M
     expose:
       - "8000"
 
