@@ -9,8 +9,8 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - c-http-server-1
-      - c-http-server-2
-      - c-http-server-3
+      # - c-http-server-2
+      # - c-http-server-3
     deploy:
       resources:
         limits:
@@ -37,14 +37,14 @@ services:
   c-http-server-1:
     <<: *http-server
     container_name: c-http-server-1
-
-  c-http-server-2:
-    <<: *http-server
-    container_name: c-http-server-2
-
-  c-http-server-3:
-    <<: *http-server
-    container_name: c-http-server-3
+  #
+  # c-http-server-2:
+  #   <<: *http-server
+  #   container_name: c-http-server-2
+  #
+  # c-http-server-3:
+  #   <<: *http-server
+  #   container_name: c-http-server-3
 
 networks:
   c-http-net:
