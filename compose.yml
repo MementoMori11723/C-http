@@ -1,51 +1,13 @@
 services:
-  reverse-proxy:
-    image: nginx:stable-alpine
-    container_name: reverse-proxy
-    restart: always
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-    depends_on:
-      - c-http-server-1
-      # - c-http-server-2
-      # - c-http-server-3
-    deploy:
-      resources:
-        limits:
-          cpus: "0.2"
-          memory: 128M
-    networks:
-      - c-http-net
-
-  c-http-server: &http-server
+  c-http-server:
     build:
       context: .
       dockerfile: Dockerfile
     restart: always
-    networks:
-      - c-http-net
     deploy:
       resources:
         limits:
-          cpus: "0.3"
-          memory: 300M
+          cpus: "0.01"
+          memory: 30M
     expose:
       - "8000"
-
-  c-http-server-1:
-    <<: *http-server
-    container_name: c-http-server-1
-  #
-  # c-http-server-2:
-  #   <<: *http-server
-  #   container_name: c-http-server-2
-  #
-  # c-http-server-3:
-  #   <<: *http-server
-  #   container_name: c-http-server-3
-
-networks:
-  c-http-net:
-    driver: bridge
