@@ -1,0 +1,20 @@
+services:
+  c-http:
+    build:
+      context: ../
+      dockerfile: config/Dockerfile
+    container_name: c-http
+    restart: always
+    networks:
+      - deploy_net 
+    deploy:
+      resources:
+        limits:
+          cpus: "0.01"
+          memory: 30M
+    expose:
+      - "8000"
+
+networks:
+  deploy_net: 
+    external: true
